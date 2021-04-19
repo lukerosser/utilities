@@ -48,8 +48,7 @@ g = Github(args.token)
 for repo in g.get_user().get_repos():
     new_default_branch_exists = True
     if (
-        # args.topic_filter in repo.get_topics()
-        repo.full_name == "KPMG-UK/curly-goggles"
+        args.topic_filter in repo.get_topics()
         and repo.organization.name == "KPMG UK"
         and not repo.archived
         and not repo.fork
