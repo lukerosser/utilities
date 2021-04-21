@@ -14,13 +14,14 @@ parser.add_argument(
     "-b", "--new_branch_name", help="Name of the new default branch", required=True
 )
 # could be improved by accepting multiple values
-# could make pattern or topic filter optional (only one must be provided)
+# could make pattern or topic filter optional (so that only one must be provided)
 parser.add_argument(
     "-f",
     "--topic_filter",
     help="Name of a topic to filter repositories on",
     required=True,
 )
+# using regex instead of the built in github search as it's more explicit
 parser.add_argument(
     "-p",
     "--pattern",
@@ -54,19 +55,15 @@ if args.dry_run:
 # using an access token
 g = Github(args.token)
 
-for repo in g.get_user().get_repos():
+search_query = f"topic:{args.topic_filter} org:KPMG-UK archived:false fork:false"
+
+for repo in g.search_repositories(query=search_query):
     new_default_branch_exists = True
     regex_match = False
     for p in args.pattern:
         if re.match(p, repo.name):
             regex_match = True
-    if (
-        args.topic_filter in repo.get_topics()
-        and repo.organization.name == "KPMG UK"
-        and not repo.archived
-        and not repo.fork
-        and regex_match
-    ):
+    if regex_match:
         repositories += 1
         logging.info(f"Processing repository {repo.full_name}")
         if repo.default_branch != args.new_branch_name:
